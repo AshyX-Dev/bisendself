@@ -61,6 +61,7 @@ def getFont(string: str):
 
 @cli.on_message()
 def onMessage(_, message: Message):
+    message.text = message.text.lower()
     if message.from_user.id == me:
         if message.text == "/lock":
             if message.reply_to_message:
@@ -152,16 +153,21 @@ def onMessage(_, message: Message):
             )
 
         elif message.text == "alpha":
+            sents = 0
+            itm = 10
             with open(requirements_path, 'r') as file:
                 words =  file.read()
                 words = words.split("\n")
-                for _ in range(10):
-                    cli.send_message(
-                        message.chat.id,
-                        random.choice(words),
-                        reply_to_message_id=message.reply_to_message.id
-                    )
-                
+                for _ in range(itm):
+                    if sents != 10:
+                        try:
+                            cli.send_message(
+                                message.chat.id,
+                                random.choice(words),
+                                reply_to_message_id=message.reply_to_message.id
+                            )
+                            sents += 1
+                        except:itm += 1
                 file.close()
 
     elif message.from_user.id in locks:
