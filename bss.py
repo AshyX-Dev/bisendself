@@ -20,6 +20,7 @@ hearts = [
     '💜',
     '🖤'
 ]
+
 cli = Client(
     "bsself",
     api_hash=hash_token,
@@ -172,7 +173,7 @@ def onMessage(_, message: Message):
                 )
                 time.sleep(0.8)
 
-    elif message.from_user.id in locks:
+    if message.from_user.id in locks:
         with open(requirements_path, 'r') as file:
                 words =  file.read()
                 words = words.split("\n")
