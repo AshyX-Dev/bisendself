@@ -4,15 +4,14 @@ requirements_path = "reqs.bss" # Bad Words Path
 
 from pyrogram import Client
 from pyrogram.types import Message, User
-from httpx import AsyncClient
-import aiofiles
+from httpx import Client
 import os
 import random
 import json
-import asyncio
+import io
 
 locks = []
-http = AsyncClient()
+http = Client()
 cli = Client(
     "bsself",
     api_hash=hash_token,
@@ -28,15 +27,15 @@ if not os.path.exists(requirements_path):
     f = open(requirements_path, "a")
     f.close()
 
-me: User = asyncio.run(cli.get_me())
+me: User = io.run(cli.get_me())
 
-async def createFont(string: str):
+def createFont(string: str):
     string = string.lower()
     return string.translate(string.maketrans("qwertyuiopasdfghjklzxcvbnm-0123456789", "Qᴡᴇʀᴛʏᴜɪᴏᴘᴀꜱᴅꜰɢʜᴊᴋʟᴢxᴄᴠʙɴᴍ-𝟎𝟏𝟐𝟑𝟒𝟓𝟔𝟕𝟖𝟗"))
 
-async def getFont(string: str):
+def getFont(string: str):
     if string.isalpha():
-        resp = await http.get(f"https://api.codebazan.ir/font/?text={string}")
+        resp = http.get(f"https://api.codebazan.ir/font/?text={string}")
         resp = resp.json()
         fnts = ''
 
@@ -49,7 +48,7 @@ async def getFont(string: str):
         return fnts
     
     else:
-        resp = await http.get(f"https://api.codebazan.ir/font/?type=fa&text={string}")
+        resp =  http.get(f"https://api.codebazan.ir/font/?type=fa&text={string}")
         resp = resp.json()
         fnts = ''
 
@@ -62,7 +61,7 @@ async def getFont(string: str):
         return fnts
 
 @cli.on_message()
-async def onMessage(_, message: Message):
+def onMessage(_, message: Message):
     if message.from_user.id == me.id:
         if message.text == "/lock":
             if message.reply_to_message:
@@ -71,12 +70,12 @@ async def onMessage(_, message: Message):
                         locks.append(
                             int(message.reply_to_message.text)
                         )
-                        await cli.edit_message_text(
+                        cli.edit_message_text(
                             message.chat.id,
                             message.id,
                             createFont("✅ user added to targets\n⌨ uid: ") + message.reply_to_message.text
                         )
-                    else: await cli.edit_message_text(
+                    else: cli.edit_message_text(
                         message.chat.id,
                         message.id,
                         createFont("user is already in list ♦")
@@ -86,19 +85,19 @@ async def onMessage(_, message: Message):
                     locks.append(
                         message.reply_to_message.from_user.id
                     )
-                    await cli.edit_message_text(
+                    cli.edit_message_text(
                         message.chat.id,
                         message.id,
                         createFont("✅ user added to targets\n⌨ uid: ") + str(message.reply_to_message.from_user.id)
                     )
                 
-                else: await cli.edit_message_text(
+                else:  cli.edit_message_text(
                     message.chat.id,
                     message.id,
                     createFont("user is already in list ♦")
                 )
             
-            else: await cli.edit_message_text(
+            else:  cli.edit_message_text(
                 message.chat.id,
                 message.id,
                 createFont("please reply to a message ❗")
@@ -111,12 +110,12 @@ async def onMessage(_, message: Message):
                         locks.remove(
                             int(message.reply_to_message.text)
                         )
-                        await cli.edit_message_text(
+                        cli.edit_message_text(
                             message.chat.id,
                             message.id,
                             createFont("✅ user removed to targets\n⌨ uid: ") + message.reply_to_message.text
                         )
-                    else: await cli.edit_message_text(
+                    else:  cli.edit_message_text(
                         message.chat.id,
                         message.id,
                         createFont("user is already in list ♦")
@@ -126,19 +125,19 @@ async def onMessage(_, message: Message):
                     locks.append(
                         message.reply_to_message.from_user.id
                     )
-                    await cli.edit_message_text(
+                    cli.edit_message_text(
                         message.chat.id,
                         message.id,
                         createFont("✅ user removed to targets\n⌨ uid: ") + str(message.reply_to_message.from_user.id)
                     )
                 
-                else: await cli.edit_message_text(
+                else:  cli.edit_message_text(
                     message.chat.id,
                     message.id,
                     createFont("user is not in list yet ♦")
                 )
             
-            else: await cli.edit_message_text(
+            else:  cli.edit_message_text(
                 message.chat.id,
                 message.id,
                 createFont("please reply to a message ❗")
@@ -146,36 +145,36 @@ async def onMessage(_, message: Message):
 
         elif message.text.startswith("فونت"):
             txt = message.text[4:].strip()
-            fnt = await getFont(txt)
-            await cli.edit_message_text(
+            fnt =  getFont(txt)
+            cli.edit_message_text(
                 message.chat.id,
                 message.id,
                 fnt
             )
 
         elif message.text == "alpha":
-            async with aiofiles.open(requirements_path, 'r') as file:
-                words = await file.read()
+            with open(requirements_path, 'r') as file:
+                words =  file.read()
                 words = words.split("\n")
                 for _ in range(10):
-                    await cli.send_message(
+                    cli.send_message(
                         message.chat.id,
                         random.choice(words),
                         reply_to_message_id=message.reply_to_message.id
                     )
                 
-                await file.close()
+                file.close()
 
     elif message.from_user.id in locks:
-        async with aiofiles.open(requirements_path, 'r') as file:
-                words = await file.read()
+        with open(requirements_path, 'r') as file:
+                words =  file.read()
                 words = words.split("\n")
-                await cli.send_message(
+                cli.send_message(
                     message.chat.id,
                     random.choice(words),
                     reply_to_message_id=message.reply_to_message.id
                 )
                 
-                await file.close()
+                file.close()
 
-asyncio.run(cli.run())
+cli.run()
