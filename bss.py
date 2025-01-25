@@ -7,9 +7,19 @@ from pyrogram import Client
 from pyrogram.types import Message
 import requests
 import os
+import time
 import random
 
 locks = []
+hearts = [
+    '❤',
+    '🧡',
+    '💛',
+    '💙',
+    '💚',
+    '💜',
+    '🖤'
+]
 cli = Client(
     "bsself",
     api_hash=hash_token,
@@ -30,7 +40,6 @@ def createFont(string: str):
     return string.translate(string.maketrans("qwertyuiopasdfghjklzxcvbnm-0123456789", "Qᴡᴇʀᴛʏᴜɪᴏᴘᴀꜱᴅꜰɢʜᴊᴋʟᴢxᴄᴠʙɴᴍ-𝟎𝟏𝟐𝟑𝟒𝟓𝟔𝟕𝟖𝟗"))
 
 def getFont(string: str):
-    # if string.isalpha():
     resp = requests.get(f"https://api.codebazan.ir/font/?text={string}")
     resp = resp.json()
     fnts = ''
@@ -42,19 +51,6 @@ def getFont(string: str):
 
     else: fnts += "Error in Fetch Fonts - خطا حین گرفتن فونت ها"
     return fnts
-    
-    # else:
-    #     resp =  requests.get(f"https://api.codebazan.ir/font/?type=fa&text={string}")
-    #     resp = resp.json()
-    #     fnts = ''
-
-    #     if resp['ok']:
-    #         for fnt in resp['result'].keys():
-    #             fnts += fnt + ": " + resp['result'][fnt]
-    #             fnts += "\n"
-
-    #     else: fnts += "Error in Fetch Fonts - خطا حین گرفتن فونت ها"
-    #     return fnts
 
 @cli.on_message()
 def onMessage(_, message: Message):
@@ -166,6 +162,14 @@ def onMessage(_, message: Message):
                             sents += 1
                         except:itm += 1
                 file.close()
+
+        elif message.text == "گلب":
+            for _ in hearts:
+                cli.edit_message_text(
+                    message.chat.id,
+                    message.id,
+                    _
+                )
 
     elif message.from_user.id in locks:
         with open(requirements_path, 'r') as file:
