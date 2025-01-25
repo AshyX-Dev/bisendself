@@ -75,21 +75,22 @@ def onMessage(_, message: Message):
                         createFont("user is already in list ♦")
                     )
 
-                elif not message.reply_to_message.from_user.id in locks:
-                    locks.append(
-                        message.reply_to_message.from_user.id
-                    )
-                    cli.edit_message_text(
+                else:
+                    if not message.reply_to_message.from_user.id in locks:
+                        locks.append(
+                            message.reply_to_message.from_user.id
+                        )
+                        cli.edit_message_text(
+                            message.chat.id,
+                            message.id,
+                            createFont("✅ user added to targets\n⌨ uid: ") + str(message.reply_to_message.from_user.id)
+                        )
+                    
+                    else: cli.edit_message_text(
                         message.chat.id,
                         message.id,
-                        createFont("✅ user added to targets\n⌨ uid: ") + str(message.reply_to_message.from_user.id)
+                        createFont("user is already in list ♦")
                     )
-                
-                else:  cli.edit_message_text(
-                    message.chat.id,
-                    message.id,
-                    createFont("user is already in list ♦")
-                )
             
             else:  cli.edit_message_text(
                 message.chat.id,
@@ -102,17 +103,17 @@ def onMessage(_, message: Message):
                 if str(message.reply_to_message.text).isdigit():
                     if int(str(message.reply_to_message.text)) in locks:
                         locks.remove(
-                            int(message.reply_to_message.text)
+                            int(str(message.reply_to_message.text))
                         )
                         cli.edit_message_text(
                             message.chat.id,
                             message.id,
                             createFont("✅ user removed from targets\n⌨ uid: ") + message.reply_to_message.text
                         )
-                    else:  cli.edit_message_text(
+                    else: cli.edit_message_text(
                         message.chat.id,
                         message.id,
-                        createFont("user is already in list ♦")
+                        createFont("user is not in list yet ♦")
                     )
 
                 elif message.reply_to_message.from_user.id in locks:
