@@ -170,6 +170,7 @@ def onMessage(_, message: Message):
                     message.id,
                     _
                 )
+                time.sleep(0.8)
 
     elif message.from_user.id in locks:
         with open(requirements_path, 'r') as file:
