@@ -4,15 +4,12 @@ me = 000 # Your UID
 requirements_path = "reqs.bss" # Bad Words Path
 
 from pyrogram import Client
-from pyrogram.types import Message, User
-from httpx import Client as httpClient
+from pyrogram.types import Message
+import requests
 import os
 import random
-import json
-import io
 
 locks = []
-http = httpClient()
 cli = Client(
     "bsself",
     api_hash=hash_token,
@@ -33,35 +30,35 @@ def createFont(string: str):
     return string.translate(string.maketrans("qwertyuiopasdfghjklzxcvbnm-0123456789", "Qᴡᴇʀᴛʏᴜɪᴏᴘᴀꜱᴅꜰɢʜᴊᴋʟᴢxᴄᴠʙɴᴍ-𝟎𝟏𝟐𝟑𝟒𝟓𝟔𝟕𝟖𝟗"))
 
 def getFont(string: str):
-    if string.isalpha():
-        resp = http.get(f"https://api.codebazan.ir/font/?text={string}")
-        resp = resp.json()
-        fnts = ''
+    # if string.isalpha():
+    resp = requests.get(f"https://api.codebazan.ir/font/?text={string}")
+    resp = resp.json()
+    fnts = ''
 
-        if resp['ok']:
-            for fnt in resp['result'].keys():
-                fnts += fnt + ": " + resp['result'][fnt]
-                fnts += "\n"
+    if resp['ok']:
+        for fnt in resp['result'].keys():
+            fnts += fnt + ": " + resp['result'][fnt]
+            fnts += "\n"
 
-        else: fnts += "Error in Fetch Fonts - خطا حین گرفتن فونت ها"
-        return fnts
+    else: fnts += "Error in Fetch Fonts - خطا حین گرفتن فونت ها"
+    return fnts
     
-    else:
-        resp =  http.get(f"https://api.codebazan.ir/font/?type=fa&text={string}")
-        resp = resp.json()
-        fnts = ''
+    # else:
+    #     resp =  requests.get(f"https://api.codebazan.ir/font/?type=fa&text={string}")
+    #     resp = resp.json()
+    #     fnts = ''
 
-        if resp['ok']:
-            for fnt in resp['result'].keys():
-                fnts += fnt + ": " + resp['result'][fnt]
-                fnts += "\n"
+    #     if resp['ok']:
+    #         for fnt in resp['result'].keys():
+    #             fnts += fnt + ": " + resp['result'][fnt]
+    #             fnts += "\n"
 
-        else: fnts += "Error in Fetch Fonts - خطا حین گرفتن فونت ها"
-        return fnts
+    #     else: fnts += "Error in Fetch Fonts - خطا حین گرفتن فونت ها"
+    #     return fnts
 
 @cli.on_message()
 def onMessage(_, message: Message):
-    message.text = message.text.lower()
+    message.text = str(message.text).lower()
     if message.from_user.id == me:
         if message.text == "/lock":
             if message.reply_to_message:
@@ -113,7 +110,7 @@ def onMessage(_, message: Message):
                         cli.edit_message_text(
                             message.chat.id,
                             message.id,
-                            createFont("✅ user removed to targets\n⌨ uid: ") + message.reply_to_message.text
+                            createFont("✅ user removed from targets\n⌨ uid: ") + message.reply_to_message.text
                         )
                     else:  cli.edit_message_text(
                         message.chat.id,
@@ -128,7 +125,7 @@ def onMessage(_, message: Message):
                     cli.edit_message_text(
                         message.chat.id,
                         message.id,
-                        createFont("✅ user removed to targets\n⌨ uid: ") + str(message.reply_to_message.from_user.id)
+                        createFont("✅ user removed from targets\n⌨ uid: ") + str(message.reply_to_message.from_user.id)
                     )
                 
                 else:  cli.edit_message_text(
