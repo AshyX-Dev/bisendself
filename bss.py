@@ -1,17 +1,18 @@
 hash_token = "" # Api Hash
 id_token = "" # Api ID
+me = 000 # Your UID
 requirements_path = "reqs.bss" # Bad Words Path
 
 from pyrogram import Client
 from pyrogram.types import Message, User
-from httpx import Client
+from httpx import Client as httpClient
 import os
 import random
 import json
 import io
 
 locks = []
-http = Client()
+http = httpClient()
 cli = Client(
     "bsself",
     api_hash=hash_token,
@@ -26,8 +27,6 @@ if not os.path.exists("bsself.session"):
 if not os.path.exists(requirements_path):
     f = open(requirements_path, "a")
     f.close()
-
-me: User = io.run(cli.get_me())
 
 def createFont(string: str):
     string = string.lower()
@@ -62,11 +61,11 @@ def getFont(string: str):
 
 @cli.on_message()
 def onMessage(_, message: Message):
-    if message.from_user.id == me.id:
+    if message.from_user.id == me:
         if message.text == "/lock":
             if message.reply_to_message:
-                if message.reply_to_message.text.isdigit():
-                    if not int(message.reply_to_message.text.isdigit()) in locks:
+                if str(message.reply_to_message.text).isdigit():
+                    if not int(str(message.reply_to_message.text)) in locks:
                         locks.append(
                             int(message.reply_to_message.text)
                         )
@@ -105,8 +104,8 @@ def onMessage(_, message: Message):
         
         elif message.text == "/unlock":
             if message.reply_to_message:
-                if message.reply_to_message.text.isdigit():
-                    if int(message.reply_to_message.text.isdigit()) in locks:
+                if str(message.reply_to_message.text).isdigit():
+                    if int(str(message.reply_to_message.text)) in locks:
                         locks.remove(
                             int(message.reply_to_message.text)
                         )
