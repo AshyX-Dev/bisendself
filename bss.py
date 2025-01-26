@@ -7,6 +7,7 @@ from pyrogram import Client
 from pyrogram.types import Message
 import requests
 import os
+import json
 import time
 import random
 
@@ -52,6 +53,15 @@ def getFont(string: str):
 
     else: fnts += "Error in Fetch Fonts - خطا حین گرفتن فونت ها"
     return fnts
+
+def getFall():
+    resp = requests.get("https://api.codebazan.ir/fal/?type=json")
+    resp = resp.json()
+
+    if resp['Ok']:
+        return resp['Result1'], resp['Result']
+
+    else: return "Error in Fetch Fonts - خطا حین گرفتن فونت ها"
 
 @cli.on_message()
 def onMessage(_, message: Message):
@@ -173,6 +183,26 @@ def onMessage(_, message: Message):
                     _
                 )
                 time.sleep(0.8)
+
+        elif message.text in ( "لیست", "list", "/list" ):
+            targets = list(set(locks))
+            cli.edit_message_text(
+                message.chat.id,
+                message.id,
+                "♻ "+json.dumps(
+                    targets,
+                    indent=2
+                )
+            )
+
+        elif message.text in ("فال", "fall", "/fall"):
+            fall = getFall()
+            if isinstance(fall, tuple):
+                cli.edit_message_text(
+                    message.chat.id,
+                    message.id,
+                    f"🚩 {fall[0]}\n\n🌐📃 {fall[1]}"
+                )
 
     if message.from_user.id in locks:
         with open(requirements_path, 'r') as file:
