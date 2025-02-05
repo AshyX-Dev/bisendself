@@ -68,10 +68,10 @@ def getFall():
 
     else: return "Error in Fetch Fonts - خطا حین گرفتن فونت ها"
 
+
 @cli.on_message()
 def onMessage(_, message: Message):
     message.text = str(message.text).lower()
-    propertyManager = bdm.getManagerProperty()
     if message.from_user.id == me:
         if message.text == "/lock":
             if message.reply_to_message:
@@ -154,7 +154,7 @@ def onMessage(_, message: Message):
 
         elif message.text == "alpha":
             sents = 0
-            itm = propertyManager['session'].alpha_range
+            itm = bdm.getAlphaRange()
             with open(requirements_path, 'r') as file:
                 words =  file.read()
                 words = words.split("\n")
@@ -184,7 +184,7 @@ def onMessage(_, message: Message):
                 message.chat.id,
                 message.id,
                 "♻ "+json.dumps(
-                    propertyManager['session'].locks,
+                    bdm.getLocks(),
                     indent=2
                 )
             )
@@ -281,7 +281,7 @@ def onMessage(_, message: Message):
                 )
 
 
-    if message.from_user.id in propertyManager['session'].locks:
+    if message.from_user.id in bdm.getLocks():
         with open(requirements_path, 'r') as file:
                 words =  file.read()
                 words = words.split("\n")

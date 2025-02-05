@@ -104,3 +104,9 @@ class BisendDatabaseManager(object):
             return { "status": "OK" }
         
         else: return { "status": manager['status'] }
+
+    def getLocks(self):
+        return self.getManagerProperty()['session'].locks
+    
+    def getAlphaRange(self):
+        return self.getManagerProperty()['session'].alpha_range
