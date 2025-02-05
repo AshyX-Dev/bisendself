@@ -4,14 +4,14 @@ me = 000 # Your UID
 requirements_path = "reqs.bss" # Bad Words Path
 
 from pyrogram import Client
-from pyrogram.types import Message
+from pyrogram.types import Message, ChatPhoto, InputMediaPhoto
+from manager import BisendDatabaseManager
 import requests
 import os
 import json
 import time
 import random
 
-locks = []
 hearts = [
     '❤',
     '🧡',
@@ -27,6 +27,8 @@ cli = Client(
     api_hash=hash_token,
     api_id=id_token
 )
+
+bdm = BisendDatabaseManager()
 
 if not os.path.exists("bsself.session"):
     cli.start()
@@ -66,14 +68,12 @@ def getFall():
 @cli.on_message()
 def onMessage(_, message: Message):
     message.text = str(message.text).lower()
+    propertyManager = bdm.getManagerProperty()
     if message.from_user.id == me:
         if message.text == "/lock":
             if message.reply_to_message:
                 if str(message.reply_to_message.text).isdigit():
-                    if not int(str(message.reply_to_message.text)) in locks:
-                        locks.append(
-                            int(message.reply_to_message.text)
-                        )
+                    if bdm.addLock(int(str(message.reply_to_message.text)))['status'] != "USER_ALREADY_LOCKED":
                         cli.edit_message_text(
                             message.chat.id,
                             message.id,
@@ -86,10 +86,7 @@ def onMessage(_, message: Message):
                     )
 
                 else:
-                    if not message.reply_to_message.from_user.id in locks:
-                        locks.append(
-                            message.reply_to_message.from_user.id
-                        )
+                    if bdm.addLock(message.reply_to_message.from_user.id)['status'] != "USER_ALREADY_LOCKED":
                         cli.edit_message_text(
                             message.chat.id,
                             message.id,
@@ -111,10 +108,7 @@ def onMessage(_, message: Message):
         elif message.text == "/unlock":
             if message.reply_to_message:
                 if str(message.reply_to_message.text).isdigit():
-                    if int(str(message.reply_to_message.text)) in locks:
-                        locks.remove(
-                            int(str(message.reply_to_message.text))
-                        )
+                    if bdm.removeLock(int(str(message.reply_to_message.text)))['status'] != "USER_NOT_LOCKED":
                         cli.edit_message_text(
                             message.chat.id,
                             message.id,
@@ -125,24 +119,22 @@ def onMessage(_, message: Message):
                         message.id,
                         createFont("user is not in list yet ♦")
                     )
-
-                elif message.reply_to_message.from_user.id in locks:
-                    locks.append(
-                        message.reply_to_message.from_user.id
-                    )
-                    cli.edit_message_text(
+                        
+                else:
+                    if bdm.removeLock(message.reply_to_message.from_user.id)['status'] != "USER_NOT_LOCKED":
+                        cli.edit_message_text(
+                            message.chat.id,
+                            message.id,
+                            createFont("✅ user removed from targets\n⌨ uid: ") + str(message.reply_to_message.from_user.id)
+                        )
+                
+                    else: cli.edit_message_text(
                         message.chat.id,
                         message.id,
-                        createFont("✅ user removed from targets\n⌨ uid: ") + str(message.reply_to_message.from_user.id)
+                        createFont("user is not in list yet ♦")
                     )
-                
-                else:  cli.edit_message_text(
-                    message.chat.id,
-                    message.id,
-                    createFont("user is not in list yet ♦")
-                )
             
-            else:  cli.edit_message_text(
+            else: cli.edit_message_text(
                 message.chat.id,
                 message.id,
                 createFont("please reply to a message ❗")
@@ -159,12 +151,12 @@ def onMessage(_, message: Message):
 
         elif message.text == "alpha":
             sents = 0
-            itm = 10
+            itm = propertyManager['session'].alpha_range
             with open(requirements_path, 'r') as file:
                 words =  file.read()
                 words = words.split("\n")
                 for _ in range(itm):
-                    if sents != 10:
+                    if sents != itm:
                         try:
                             cli.send_message(
                                 message.chat.id,
@@ -185,12 +177,11 @@ def onMessage(_, message: Message):
                 time.sleep(0.8)
 
         elif message.text in ( "لیست", "list", "/list" ):
-            targets = list(set(locks))
             cli.edit_message_text(
                 message.chat.id,
                 message.id,
                 "♻ "+json.dumps(
-                    targets,
+                    propertyManager['session'].locks,
                     indent=2
                 )
             )
@@ -204,7 +195,93 @@ def onMessage(_, message: Message):
                     f"🚩 {fall[0]}\n\n🌐📃 {fall[1]}"
                 )
 
-    if message.from_user.id in locks:
+        elif message.text.startswith("تنظیم مقدار"):
+            length = str(message.text)[11:].strip()
+
+            if length.isdigit():
+                bdm.setAlphaRange(length)
+                cli.edit_message_text(
+                    message.chat.id,
+                    message.id,
+                    createFont(f"seted {length} range for Alpha mode 🍾")
+                )
+            
+            else:
+                cli.edit_message_text(
+                    message.chat.id,
+                    message.id,
+                    createFont(f"no digits detected ❌")
+                )
+
+        elif message.text in ( "پنل کاربر", "پنل یوزر", "یوزر", "کلاینت", "info", "اطلاعات" ):
+            try:
+                if not message.reply_to_message.from_user.photo:
+                    cli.edit_message_text(
+                        message.chat.id,
+                        message.id,
+                        createFont("🎟 name: ") + message.reply_to_message.from_user.first_name + " " + message.reply_to_message.from_user.last_name + "\n" + \
+                        createFont("🎫 uid: ") + message.reply_to_message.from_user.id + "\n" + \
+                        createFont("👥 language code: ") + message.reply_to_message.from_user.language_code if message.reply_to_message.from_user.language_code else "null" + "\n" + \
+                        createFont("🕹 phone number: ") + message.reply_to_message.from_user.phone_number if message.reply_to_message.from_user.phone_number else "null" + "\n" + \
+                        createFont("📪 username: ") + message.reply_to_message.from_user.username if message.reply_to_message.from_user.username else "null" + "\n" + \
+                        createFont("🛰 online date: ") + message.reply_to_message.from_user.last_online_date if message.reply_to_message.from_user.last_online_date else "null" + "\n" + \
+                        createFont("🧣 next offline date: ") + message.reply_to_message.from_user.next_offline_date if message.reply_to_message.from_user.next_offline_date else "null" + "\n" + \
+                        "----------" + "\n" + \
+                        createFont("👾 is bot: ") + message.reply_to_message.from_user.is_bot + "\n" + \
+                        createFont("🍃 is premium: ") + message.reply_to_message.from_user.is_premium + "\n" + \
+                        createFont("🤺 is contact: ") + message.reply_to_message.from_user.is_contact + "\n" + \
+                        createFont("👀 is fake: ") + message.reply_to_message.from_user.is_fake + "\n" + \
+                        createFont("📠 is deleted: ") + message.reply_to_message.from_user.is_deleted + "\n" + \
+                        createFont("🔰 is self: ") + message.reply_to_message.from_user.is_self + "\n" + \
+                        createFont("🐱‍👤 is scam: ") + message.reply_to_message.from_user.is_scam + "\n" + \
+                        createFont("🚦 is support: ") + message.reply_to_message.from_user.is_support + "\n" + \
+                        createFont("🍡 is verified: ") + message.reply_to_message.from_user.is_verified + "\n" + \
+                        createFont("🎃 is mutual contact:") + message.reply_to_message.from_user.is_mutual_contact + "\n\n" + \
+                        createFont(f"📁📥 captured from {message.chat.id}")
+                    )
+
+                else:
+                    fname = f"photo_{random.randint(100, 9999)}"
+                    cli.download_media(
+                        message.reply_to_message.from_user.photo.big_file_id,
+                        file_name=fname
+                    )
+                    cli.edit_message_media(
+                        message.chat.id,
+                        message.id,
+                        InputMediaPhoto(fname, 
+                            createFont("🎟 name: ") + message.reply_to_message.from_user.first_name + " " + message.reply_to_message.from_user.last_name + "\n" + \
+                            createFont("🎫 uid: ") + message.reply_to_message.from_user.id + "\n" + \
+                            createFont("👥 language code: ") + message.reply_to_message.from_user.language_code if message.reply_to_message.from_user.language_code else "null" + "\n" + \
+                            createFont("🕹 phone number: ") + message.reply_to_message.from_user.phone_number if message.reply_to_message.from_user.phone_number else "null" + "\n" + \
+                            createFont("📪 username: ") + message.reply_to_message.from_user.username if message.reply_to_message.from_user.username else "null" + "\n" + \
+                            createFont("🛰 online date: ") + message.reply_to_message.from_user.last_online_date if message.reply_to_message.from_user.last_online_date else "null" + "\n" + \
+                            createFont("🧣 next offline date: ") + message.reply_to_message.from_user.next_offline_date if message.reply_to_message.from_user.next_offline_date else "null" + "\n" + \
+                            "----------" + "\n" + \
+                            createFont("👾 is bot: ") + message.reply_to_message.from_user.is_bot + "\n" + \
+                            createFont("🍃 is premium: ") + message.reply_to_message.from_user.is_premium + "\n" + \
+                            createFont("🤺 is contact: ") + message.reply_to_message.from_user.is_contact + "\n" + \
+                            createFont("👀 is fake: ") + message.reply_to_message.from_user.is_fake + "\n" + \
+                            createFont("📠 is deleted: ") + message.reply_to_message.from_user.is_deleted + "\n" + \
+                            createFont("🔰 is self: ") + message.reply_to_message.from_user.is_self + "\n" + \
+                            createFont("🐱‍👤 is scam: ") + message.reply_to_message.from_user.is_scam + "\n" + \
+                            createFont("🚦 is support: ") + message.reply_to_message.from_user.is_support + "\n" + \
+                            createFont("🍡 is verified: ") + message.reply_to_message.from_user.is_verified + "\n" + \
+                            createFont("🎃 is mutual contact:") + message.reply_to_message.from_user.is_mutual_contact + "\n\n" + \
+                            createFont(f"📁📥 captured from {message.chat.id}")
+                        )
+                    )
+                    os.remove(fname)
+            
+            except Exception as ErrorPro:
+                cli.edit_message_text(
+                    message.chat.id,
+                    message.id,
+                    createFont("Error: ") + ErrorPro
+                )
+
+
+    if message.from_user.id in propertyManager['session'].locks:
         with open(requirements_path, 'r') as file:
                 words =  file.read()
                 words = words.split("\n")
