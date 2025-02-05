@@ -288,7 +288,7 @@ def onMessage(_, message: Message):
                 cli.send_message(
                     message.chat.id,
                     random.choice(words),
-                    reply_to_message_id=message.reply_to_message.id
+                    reply_to_message_id=message.id
                 )
                 
                 file.close()
