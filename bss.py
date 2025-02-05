@@ -39,6 +39,9 @@ if not os.path.exists(requirements_path):
     f = open(requirements_path, "a")
     f.close()
 
+def safe_get(attr, default="null"):
+    return attr if attr else default
+
 def createFont(string: str):
     string = string.lower()
     return string.translate(string.maketrans("qwertyuiopasdfghjklzxcvbnm-0123456789", "Qᴡᴇʀᴛʏᴜɪᴏᴘᴀꜱᴅꜰɢʜᴊᴋʟᴢxᴄᴠʙɴᴍ-𝟎𝟏𝟐𝟑𝟒𝟓𝟔𝟕𝟖𝟗"))
@@ -219,25 +222,25 @@ def onMessage(_, message: Message):
                     cli.edit_message_text(
                         message.chat.id,
                         message.id,
-                        createFont("🎟 name: ") + message.reply_to_message.from_user.first_name + " " + message.reply_to_message.from_user.last_name + "\n" + \
-                        createFont("🎫 uid: ") + message.reply_to_message.from_user.id + "\n" + \
-                        createFont("👥 language code: ") + message.reply_to_message.from_user.language_code if message.reply_to_message.from_user.language_code else "null" + "\n" + \
-                        createFont("🕹 phone number: ") + message.reply_to_message.from_user.phone_number if message.reply_to_message.from_user.phone_number else "null" + "\n" + \
-                        createFont("📪 username: ") + message.reply_to_message.from_user.username if message.reply_to_message.from_user.username else "null" + "\n" + \
-                        createFont("🛰 online date: ") + message.reply_to_message.from_user.last_online_date if message.reply_to_message.from_user.last_online_date else "null" + "\n" + \
-                        createFont("🧣 next offline date: ") + message.reply_to_message.from_user.next_offline_date if message.reply_to_message.from_user.next_offline_date else "null" + "\n" + \
-                        "----------" + "\n" + \
-                        createFont("👾 is bot: ") + str(message.reply_to_message.from_user.is_bot) + "\n" + \
-                        createFont("🍃 is premium: ") + str(message.reply_to_message.from_user.is_premium) + "\n" + \
-                        createFont("🤺 is contact: ") + str(message.reply_to_message.from_user.is_contact) + "\n" + \
-                        createFont("👀 is fake: ") + str(message.reply_to_message.from_user.is_fake) + "\n" + \
-                        createFont("📠 is deleted: ") + str(message.reply_to_message.from_user.is_deleted) + "\n" + \
-                        createFont("🔰 is self: ") + str(message.reply_to_message.from_user.is_self) + "\n" + \
-                        createFont("🐱‍👤 is scam: ") + str(message.reply_to_message.from_user.is_scam) + "\n" + \
-                        createFont("🚦 is support: ") + str(message.reply_to_message.from_user.is_support) + "\n" + \
-                        createFont("🍡 is verified: ") + str(message.reply_to_message.from_user.is_verified) + "\n" + \
-                        createFont("🎃 is mutual contact:") + str(message.reply_to_message.from_user.is_mutual_contact) + "\n\n" + \
-                        createFont(f"📁📥 captured from {message.chat.id}")
+                        createFont("🎟 name: ") + safe_get(message.reply_to_message.from_user.first_name) + " " + safe_get(message.reply_to_message.from_user.last_name) + "\n" +
+                        createFont("🎫 uid: ") + str(message.reply_to_message.from_user.id) + "\n" +
+                        createFont("👥 language code: ") + safe_get(message.reply_to_message.from_user.language_code) + "\n" +
+                        createFont("🕹 phone number: ") + safe_get(message.reply_to_message.from_user.phone_number) + "\n" +
+                        createFont("📪 username: ") + safe_get(message.reply_to_message.from_user.username) + "\n" +
+                        createFont("🛰 online date: ") + safe_get(message.reply_to_message.from_user.last_online_date) + "\n" +
+                        createFont("🧣 next offline date: ") + safe_get(message.reply_to_message.from_user.next_offline_date) + "\n" +
+                        "----------" + "\n" +
+                        createFont("👾 is bot: ") + str(message.reply_to_message.from_user.is_bot) + "\n" +
+                        createFont("🍃 is premium: ") + str(message.reply_to_message.from_user.is_premium) + "\n" +
+                        createFont("🤺 is contact: ") + str(message.reply_to_message.from_user.is_contact) + "\n" +
+                        createFont("👀 is fake: ") + str(message.reply_to_message.from_user.is_fake) + "\n" +
+                        createFont("📠 is deleted: ") + str(message.reply_to_message.from_user.is_deleted) + "\n" +
+                        createFont("🔰 is self: ") + str(message.reply_to_message.from_user.is_self) + "\n" +
+                        createFont("🐱‍👤 is scam: ") + str(message.reply_to_message.from_user.is_scam) + "\n" +
+                        createFont("🚦 is support: ") + str(message.reply_to_message.from_user.is_support) + "\n" +
+                        createFont("🍡 is verified: ") + str(message.reply_to_message.from_user.is_verified) + "\n" +
+                        createFont("🎃 is mutual contact: ") + str(message.reply_to_message.from_user.is_mutual_contact) + "\n\n" +
+                        createFont(f"📁📥 captured from {message.chat.id}") + f" | {message.chat.id}"
                     )
 
                 else:
@@ -246,30 +249,27 @@ def onMessage(_, message: Message):
                         message.reply_to_message.from_user.photo.big_file_id,
                         file_name=fname
                     )
-                    cli.edit_message_media(
-                        message.chat.id,
-                        message.id,
-                        InputMediaPhoto("downloads/"+fname,
-                            createFont("🎟 name: ") + message.reply_to_message.from_user.first_name + " " + message.reply_to_message.from_user.last_name + "\n" + \
-                            createFont("🎫 uid: ") + message.reply_to_message.from_user.id + "\n" + \
-                            createFont("👥 language code: ") + message.reply_to_message.from_user.language_code if message.reply_to_message.from_user.language_code else "null" + "\n" + \
-                            createFont("🕹 phone number: ") + message.reply_to_message.from_user.phone_number if message.reply_to_message.from_user.phone_number else "null" + "\n" + \
-                            createFont("📪 username: ") + message.reply_to_message.from_user.username if message.reply_to_message.from_user.username else "null" + "\n" + \
-                            createFont("🛰 online date: ") + message.reply_to_message.from_user.last_online_date if message.reply_to_message.from_user.last_online_date else "null" + "\n" + \
-                            createFont("🧣 next offline date: ") + message.reply_to_message.from_user.next_offline_date if message.reply_to_message.from_user.next_offline_date else "null" + "\n" + \
-                            "----------" + "\n" + \
-                            createFont("👾 is bot: ") + str(message.reply_to_message.from_user.is_bot) + "\n" + \
-                            createFont("🍃 is premium: ") + str(message.reply_to_message.from_user.is_premium) + "\n" + \
-                            createFont("🤺 is contact: ") + str(message.reply_to_message.from_user.is_contact) + "\n" + \
-                            createFont("👀 is fake: ") + str(message.reply_to_message.from_user.is_fake) + "\n" + \
-                            createFont("📠 is deleted: ") + str(message.reply_to_message.from_user.is_deleted) + "\n" + \
-                            createFont("🔰 is self: ") + str(message.reply_to_message.from_user.is_self) + "\n" + \
-                            createFont("🐱‍👤 is scam: ") + str(message.reply_to_message.from_user.is_scam) + "\n" + \
-                            createFont("🚦 is support: ") + str(message.reply_to_message.from_user.is_support) + "\n" + \
-                            createFont("🍡 is verified: ") + str(message.reply_to_message.from_user.is_verified) + "\n" + \
-                            createFont("🎃 is mutual contact:") + str(message.reply_to_message.from_user.is_mutual_contact) + "\n\n" + \
-                            createFont(f"📁📥 captured from {message.chat.id}")
-                        )
+                    cli.delete_messages(message.chat.id, [message.id])
+                    cli.send_photo(message.chat.id, "downloads/"+fname,
+                        createFont("🎟 name: ") + safe_get(message.reply_to_message.from_user.first_name) + " " + safe_get(message.reply_to_message.from_user.last_name) + "\n" +
+                        createFont("🎫 uid: ") + str(message.reply_to_message.from_user.id) + "\n" +
+                        createFont("👥 language code: ") + safe_get(message.reply_to_message.from_user.language_code) + "\n" +
+                        createFont("🕹 phone number: ") + safe_get(message.reply_to_message.from_user.phone_number) + "\n" +
+                        createFont("📪 username: ") + safe_get(message.reply_to_message.from_user.username) + "\n" +
+                        createFont("🛰 online date: ") + safe_get(message.reply_to_message.from_user.last_online_date) + "\n" +
+                        createFont("🧣 next offline date: ") + safe_get(message.reply_to_message.from_user.next_offline_date) + "\n" +
+                        "----------" + "\n" +
+                        createFont("👾 is bot: ") + str(message.reply_to_message.from_user.is_bot) + "\n" +
+                        createFont("🍃 is premium: ") + str(message.reply_to_message.from_user.is_premium) + "\n" +
+                        createFont("🤺 is contact: ") + str(message.reply_to_message.from_user.is_contact) + "\n" +
+                        createFont("👀 is fake: ") + str(message.reply_to_message.from_user.is_fake) + "\n" +
+                        createFont("📠 is deleted: ") + str(message.reply_to_message.from_user.is_deleted) + "\n" +
+                        createFont("🔰 is self: ") + str(message.reply_to_message.from_user.is_self) + "\n" +
+                        createFont("🐱‍👤 is scam: ") + str(message.reply_to_message.from_user.is_scam) + "\n" +
+                        createFont("🚦 is support: ") + str(message.reply_to_message.from_user.is_support) + "\n" +
+                        createFont("🍡 is verified: ") + str(message.reply_to_message.from_user.is_verified) + "\n" +
+                        createFont("🎃 is mutual contact: ") + str(message.reply_to_message.from_user.is_mutual_contact) + "\n\n" +
+                        createFont(f"📁📥 captured from {message.chat.id}") + f" | {message.chat.id}"
                     )
                     os.remove("downloads/"+fname)
             
