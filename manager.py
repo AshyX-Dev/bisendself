@@ -95,7 +95,7 @@ class BisendDatabaseManager(object):
         
         manager = self.getManagerProperty()
         if manager['status'] == "OK":
-            self.bisend.execute("UPDATE session SET locks = ? WHERE id = ?", (
+            self.bisend.execute("UPDATE session SET alpha_range = ? WHERE id = ?", (
                 arange,
                 0
             ))
