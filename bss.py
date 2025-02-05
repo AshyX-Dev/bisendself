@@ -222,7 +222,7 @@ def onMessage(_, message: Message):
                     cli.edit_message_text(
                         message.chat.id,
                         message.id,
-                        createFont("🎟 name: ") + safe_get(message.reply_to_message.from_user.first_name) + " " + safe_get(message.reply_to_message.from_user.last_name) + "\n" +
+                        createFont("🎟 name: ") + safe_get(message.reply_to_message.from_user.first_name) + " - " + safe_get(message.reply_to_message.from_user.last_name) + "\n" +
                         createFont("🎫 uid: ") + str(message.reply_to_message.from_user.id) + "\n" +
                         createFont("👥 language code: ") + safe_get(message.reply_to_message.from_user.language_code) + "\n" +
                         createFont("🕹 phone number: ") + safe_get(message.reply_to_message.from_user.phone_number) + "\n" +
@@ -251,7 +251,7 @@ def onMessage(_, message: Message):
                     )
                     cli.delete_messages(message.chat.id, [message.id])
                     cli.send_photo(message.chat.id, "downloads/"+fname,
-                        createFont("🎟 name: ") + safe_get(message.reply_to_message.from_user.first_name) + " " + safe_get(message.reply_to_message.from_user.last_name) + "\n" +
+                        createFont("🎟 name: ") + safe_get(message.reply_to_message.from_user.first_name) + " - " + safe_get(message.reply_to_message.from_user.last_name) + "\n" +
                         createFont("🎫 uid: ") + str(message.reply_to_message.from_user.id) + "\n" +
                         createFont("👥 language code: ") + safe_get(message.reply_to_message.from_user.language_code) + "\n" +
                         createFont("🕹 phone number: ") + safe_get(message.reply_to_message.from_user.phone_number) + "\n" +

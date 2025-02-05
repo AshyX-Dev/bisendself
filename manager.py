@@ -11,7 +11,7 @@ class BisendDatabaseManager(object):
         self.bisend.execute(
             """
             CREATE TABLE IF NOT EXISTS session (
-                sid INTEGER PRIMARY KEY,
+                id INTEGER PRIMARY KEY,
                 uptime TEXT,
                 locks TEXT,
                 alpha_range INTEGER
@@ -23,7 +23,7 @@ class BisendDatabaseManager(object):
         if pre_session['status'] != "OK":
             self.bisend.execute(
                 """
-                INSERT INTO session ( sid, uptime, locks, alpha_range ) VALUES ( ?, ?, ?, ? )
+                INSERT INTO session ( id, uptime, locks, alpha_range ) VALUES ( ?, ?, ?, ? )
                 """,
                 (
                     0,
