@@ -4,8 +4,14 @@ me = 000 # Your UID
 requirements_path = "reqs.bss" # Bad Words Path
 
 from pyrogram import Client
-from pyrogram.types import Message, ChatPhoto, InputMediaPhoto
+from pyrogram.types import Message
 from manager import BisendDatabaseManager
+from pytz import timezone
+from datetime import datetime
+import httpx
+from bs4 import BeautifulSoup
+from fake_useragent import FakeUserAgent
+import googlesearch
 import requests
 import os
 import json
@@ -68,6 +74,26 @@ def getFall():
 
     else: return "Error in Fetch Fonts - خطا حین گرفتن فونت ها"
 
+def getTehranTimezone() -> datetime:
+    return datetime.now(timezone("Asia/Tehran"))
+
+def getMp3LinksWithTitle(url):
+    response = httpx.get(url, headers={
+        "User-Agent": FakeUserAgent().random
+    })
+    if response.status_code != 200:
+        print(f"Error: Unable to access {url}")
+        return {}
+    soup = BeautifulSoup(response.content, 'html.parser')
+    title = soup.title.string if soup.title else 'No Title'
+    links = soup.find_all('a')
+    mp3_links = [link.get('href') for link in links if link.get('href') and link.get('href').endswith('.mp3')]
+    if not mp3_links==[]:
+        try:
+            return {
+        'name': title,
+        'url': mp3_links[0]}
+        except:...
 
 @cli.on_message()
 def onMessage(_, message: Message):
@@ -280,6 +306,54 @@ def onMessage(_, message: Message):
                     createFont(f"Error: {ErrorPro}")
                 )
 
+        elif message.text.startswith("موزیک"):
+            music = str(message.text[5:]).strip()
+            spl = music.split()
+            if spl > 2:
+                if spl[0].isdigit():
+                    results = [getMp3LinksWithTitle(m) for m in googlesearch.search(music[2:], num_results=int(spl[0]))]
+                    for res in results:
+                        if isinstance(res, dict):
+                            message.delete()
+                            message.reply_audio(
+                                res['url'],
+                                caption="🔉 "+res['name']
+                            )
+                            continue
+                    
+                    message.edit_text(
+                        createFont("cannot found the music - موزیک پیدا نشد")
+                    )
+
+                else:
+                    results = [getMp3LinksWithTitle(m) for m in googlesearch.search(music, num_results=5)]
+                    for res in results:
+                        if isinstance(res, dict):
+                            message.delete()
+                            message.reply_audio(
+                                res['url'],
+                                caption="🔉 "+res['name']
+                            )
+                            continue
+                    
+                    message.edit_text(
+                        createFont("cannot found the music - موزیک پیدا نشد")
+                    )
+
+            else:
+                results = [getMp3LinksWithTitle(m) for m in googlesearch.search(music, num_results=5)]
+                for res in results:
+                    if isinstance(res, dict):
+                        message.delete()
+                        message.reply_audio(
+                            res['url'],
+                            caption="🔉 "+res['name']
+                        )
+                        continue
+                
+                message.edit_text(
+                    createFont("cannot found the music - موزیک پیدا نشد")
+                )
 
     if message.from_user.id in bdm.getLocks():
         with open(requirements_path, 'r') as file:
